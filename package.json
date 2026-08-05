@@ -1,0 +1,25 @@
+{
+  "name": "jobradar-server",
+  "version": "1.0.0",
+  "description": "JobRadar — agrégateur d'offres (France Travail + sources ouvertes), comptes synchronisés et alertes e-mail.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "scan": "node lib/scan.js",
+    "test": "node test/backend.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
