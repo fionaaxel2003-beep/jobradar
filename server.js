@@ -7,10 +7,10 @@ import cron from 'node-cron';
 import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { load, saveSoon, getUser, getUserByEmail, createUser } from './lib/store.js';
-import { aggregate } from './lib/aggregate.js';
-import { ftConfigured } from './lib/francetravail.js';
-import { runScan } from './lib/scan.js';
+import { load, saveSoon, getUser, getUserByEmail, createUser, initStore } from './store.js';
+import { aggregate } from './aggregate.js';
+import { ftConfigured } from './francetravail.js';
+import { runScan } from './scan.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
@@ -114,20 +114,20 @@ app.delete('/api/saved/:id', auth, (req, res) => {
   saveSoon(); res.json({ saved:u.saved });
 });
 
-// ---- Frontend statique ----
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// ---- Frontend ----
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// ---- Scan planifié (si activé sur cet hôte) ----
-// Sur hébergement gratuit, on préfère GitHub Actions ; mais si RUN_CRON=1 et hôte toujours actif :
+// ---- Scan planifié (si RUN_CRON=1 et hôte toujours actif) ----
 if(process.env.RUN_CRON === '1'){
-  const expr = process.env.CRON_EXPR || '*/20 * * * *'; // toutes les 20 min
+  const expr = process.env.CRON_EXPR || '*/20 * * * *';
   cron.schedule(expr, () => { runScan().catch(e => console.error('scan error', e)); });
   console.log('Cron interne activé :', expr);
 }
 
 const PORT = process.env.PORT || 3000;
 if(process.env.NODE_ENV !== 'test'){
-  app.listen(PORT, () => console.log(`JobRadar sur http://localhost:${PORT} — France Travail ${ftConfigured()?'configuré':'NON configuré (clés manquantes)'}`));
+  initStore().then(() =>
+    app.listen(PORT, () => console.log(`JobRadar sur http://localhost:${PORT} — France Travail ${ftConfigured()?'configuré':'NON configuré (clés manquantes)'}`))
+  );
 }
 export { app };
