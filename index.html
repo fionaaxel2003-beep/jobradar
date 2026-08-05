@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobRadar</title>
+<style>
+  :root{--bg:#0f1220;--panel:#181b2e;--panel2:#1f2340;--line:#2b3057;--txt:#e7e9f5;--muted:#9aa0c4;
+    --accent:#6c8cff;--accent2:#43d6a0;--warn:#ffb454;--danger:#ff6b81;--chip:#262b4d;--radius:14px;--shadow:0 10px 30px rgba(0,0,0,.35)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;background:linear-gradient(160deg,#0c0f1c,#141834 60%,#0c0f1c);color:var(--txt);min-height:100vh}
+  a{color:var(--accent)} button{font-family:inherit;cursor:pointer}
+  .hidden{display:none!important}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px}
+  header.top{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(20,24,52,.6);position:sticky;top:0;z-index:20}
+  .logo{font-weight:800;font-size:20px;display:flex;align-items:center;gap:8px}
+  .logo .dot{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#8fa8ff,#4d6bff);box-shadow:0 0 14px #4d6bff}
+  .spacer{flex:1}
+  .userbadge{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);padding:6px 12px;border-radius:30px;font-size:14px}
+  .userbadge .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6c8cff,#43d6a0);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#0c0f1c}
+  .btn{background:var(--accent);color:#0c0f1c;border:none;padding:10px 16px;border-radius:10px;font-weight:700;font-size:14px;transition:.15s}
+  .btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn.sec{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .btn.sm{padding:7px 12px;font-size:13px;border-radius:9px}
+  nav.tabs{display:flex;gap:6px;padding:12px 18px 0;flex-wrap:wrap}
+  nav.tabs button{background:transparent;border:1px solid transparent;color:var(--muted);padding:10px 16px;border-radius:10px 10px 0 0;font-weight:600;font-size:15px}
+  nav.tabs button.active{color:var(--txt);background:var(--panel);border-color:var(--line);border-bottom-color:var(--panel)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}
+  @media(max-width:840px){.g2{grid-template-columns:1fr}}
+  h1,h2,h3{margin:.2em 0 .5em}h2{font-size:20px}h3{font-size:16px}
+  .muted{color:var(--muted)}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input,select,textarea{width:100%;background:#12162b;border:1px solid var(--line);color:var(--txt);padding:10px 12px;border-radius:10px;font-size:14px;font-family:inherit}
+  textarea{resize:vertical;min-height:80px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--line);color:var(--muted);padding:4px 10px;border-radius:20px;font-size:12px;margin:2px}
+  .pill{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-card{width:100%;max-width:420px}
+  .login-card .logo{justify-content:center;font-size:30px;margin-bottom:6px}
+  .joblist{display:grid;gap:12px}
+  .jobcard{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .jobcard .jt{font-weight:700;font-size:16px}
+  .jobcard .jc{color:var(--accent2);font-size:14px;font-weight:600}
+  .jobcard .jm{color:var(--muted);font-size:13px;margin:4px 0}
+  .jobcard .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .badge-new{background:var(--accent2);color:#0c0f1c;font-weight:700;font-size:11px;padding:2px 8px;border-radius:20px}
+  .badge-ft{background:#2b59ff;color:#fff;font-weight:700;font-size:11px;padding:2px 8px;border-radius:20px}
+  .site-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .site{display:flex;flex-direction:column;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;text-decoration:none;color:var(--txt);transition:.15s}
+  .site:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .site .sn{font-weight:700;font-size:15px}.site .sd{font-size:12px;color:var(--muted)}
+  .site .datesort{align-self:flex-start;margin-top:2px;font-size:10px;background:rgba(67,214,160,.15);color:var(--accent2);padding:2px 7px;border-radius:20px;border:1px solid rgba(67,214,160,.3)}
+  .section-title{display:flex;align-items:center;gap:10px;margin:22px 0 10px}.section-title h3{margin:0}.section-title .line{flex:1;height:1px;background:var(--line)}
+  .letter-out{white-space:pre-wrap;background:#0d1122;border:1px solid var(--line);border-radius:12px;padding:18px;font-size:14px;line-height:1.6;min-height:200px}
+  table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .status-sel{padding:5px 8px;font-size:12px;border-radius:8px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent2);color:#0c0f1c;padding:12px 22px;border-radius:12px;font-weight:700;box-shadow:var(--shadow);z-index:100;opacity:0;transition:.3s}
+  .toast.show{opacity:1;bottom:34px}
+  .toast.err{background:var(--danger);color:#fff}
+  .notice{background:rgba(108,140,255,.1);border:1px solid rgba(108,140,255,.35);border-radius:12px;padding:12px 14px;font-size:13px;color:#c7d0ff}
+  .warnbox{background:rgba(255,180,84,.1);border:1px solid rgba(255,180,84,.35);border-radius:12px;padding:12px 14px;font-size:13px;color:#ffdca6}
+  .foot{color:var(--muted);font-size:12px;text-align:center;padding:26px 0}
+  .switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--muted)}.switch input{width:auto}
+  .err{color:var(--danger);font-size:13px;margin-top:8px;min-height:18px}
+  @media(max-width:600px){
+    .wrap{padding:12px}header.top{flex-wrap:wrap;gap:8px;padding:10px 12px}.logo{font-size:17px}
+    nav.tabs{gap:4px;padding:10px 8px 0;flex-wrap:nowrap;overflow-x:auto}nav.tabs button{padding:9px 12px;font-size:14px;white-space:nowrap;flex:0 0 auto}
+    .panel{padding:14px}.site-grid{grid-template-columns:1fr 1fr;gap:8px}.jobcard .actions .btn{flex:1 1 auto;text-align:center}
+  }
+  @media(max-width:380px){.site-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH ===== -->
+<div id="authView" class="login-wrap">
+  <div class="login-card panel">
+    <div class="logo"><span class="dot"></span> JobRadar</div>
+    <p class="muted" style="text-align:center">Tes offres, tes lettres, tes alertes — synchronisés sur tous tes appareils.</p>
+    <div id="authTabs" class="row" style="justify-content:center;margin:14px 0">
+      <button class="btn sm" id="tabLogin" onclick="authMode('login')">Se connecter</button>
+      <button class="btn sec sm" id="tabReg" onclick="authMode('register')">Créer un compte</button>
+    </div>
+    <label>E-mail</label>
+    <input id="authEmail" type="email" placeholder="ton@email.fr" autocomplete="email">
+    <label>Mot de passe</label>
+    <input id="authPass" type="password" placeholder="6 caractères minimum" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+    <div class="err" id="authErr"></div>
+    <button class="btn" style="width:100%;margin-top:6px" id="authSubmit" onclick="submitAuth()">Se connecter</button>
+    <p class="muted" style="font-size:12px;text-align:center;margin-top:12px">3 amis = 3 comptes. Chacun crée le sien avec son e-mail.</p>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appView" class="hidden">
+  <header class="top">
+    <div class="logo"><span class="dot"></span> JobRadar</div>
+    <div class="spacer"></div>
+    <div class="userbadge"><div class="av" id="badgeAv">?</div><span id="badgeName">—</span></div>
+    <button class="btn ghost sm" onclick="doLogout()">Déconnexion</button>
+  </header>
+  <nav class="tabs">
+    <button data-tab="search" class="active" onclick="tab('search')">🔎 Offres</button>
+    <button data-tab="letter" onclick="tab('letter')">✍️ Lettre</button>
+    <button data-tab="tracker" onclick="tab('tracker')">📋 Candidatures</button>
+    <button data-tab="profile" onclick="tab('profile')">⚙️ Profil & alertes</button>
+  </nav>
+  <div class="wrap">
+
+    <section id="tab-search">
+      <div class="panel">
+        <div class="row" style="align-items:flex-end;justify-content:space-between">
+          <div>
+            <h2 style="margin:0">Bonjour <span id="helloName">👋</span></h2>
+            <p class="muted" style="margin:4px 0 0">Domaine : <b id="sumDomain">—</b> · Mots-clés : <b id="sumKw">—</b> · Lieu : <b id="sumLoc">—</b></p>
+          </div>
+          <button class="btn" onclick="fetchJobs()">↻ Actualiser</button>
+        </div>
+      </div>
+
+      <div class="section-title"><h3>🟢 Offres en direct</h3><div class="line"></div><span class="pill" id="liveCount">0</span></div>
+      <div id="ftBanner" class="warnbox hidden" style="margin-bottom:10px"></div>
+      <p class="muted" style="font-size:13px;margin-top:-4px">France Travail (filtré sur ta zone, trié par date) + sources ouvertes. Les plus récentes en haut.</p>
+      <div class="joblist" id="liveJobs"></div>
+
+      <div class="section-title"><h3>🚀 Lanceur multi-sites — triés par date</h3><div class="line"></div></div>
+      <div class="site-grid" id="siteGrid"></div>
+
+      <div class="section-title"><h3>🎯 Job boards spécialisés — <span id="sectorLabel">ton domaine</span></h3><div class="line"></div></div>
+      <div class="site-grid" id="nicheGrid"></div>
+
+      <div class="section-title"><h3>🏢 Sites carrières d'entreprises</h3><div class="line"></div></div>
+      <div class="row" style="margin:8px 0"><input id="companyInput" placeholder="Nom d'une entreprise (ex : Décathlon)" style="max-width:320px" onkeydown="if(event.key==='Enter')addCompany()"><button class="btn sm" onclick="addCompany()">+ Ajouter</button></div>
+      <div id="companySuggest" style="margin-bottom:10px"></div>
+      <div class="site-grid" id="companyGrid"></div>
+    </section>
+
+    <section id="tab-letter" class="hidden">
+      <div class="grid g2">
+        <div class="panel">
+          <h2>✍️ Lettre adaptée à l'offre</h2>
+          <label>Intitulé du poste *</label><input id="lPoste" placeholder="ex : Développeur back-end">
+          <label>Entreprise *</label><input id="lEntreprise" placeholder="ex : Doctolib">
+          <label>Ville / lieu</label><input id="lLieu" placeholder="ex : Paris">
+          <label>Où as-tu vu l'offre ?</label><input id="lSource" placeholder="ex : France Travail, LinkedIn…">
+          <label>Critères / compétences demandés</label><textarea id="lCriteres" placeholder="ex : Python, Django, 3 ans d'expérience…"></textarea>
+          <div class="row" style="margin-top:14px"><button class="btn" onclick="genLetter()">Générer</button><button class="btn sec sm" onclick="fillDemoOffer()">Exemple</button></div>
+          <div id="aiState" class="muted" style="font-size:12px;margin-top:10px"></div>
+        </div>
+        <div class="panel">
+          <div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Ta lettre</h2>
+            <div class="row"><button class="btn sec sm" onclick="copyLetter()">📋 Copier</button><button class="btn sec sm" onclick="downloadLetter()">⬇️</button><button class="btn sm" onclick="saveFromLetter()">💾 Suivre</button></div></div>
+          <div class="letter-out" id="letterOut" contenteditable="true">Ta lettre apparaîtra ici (modifiable avant de copier).</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-tracker" class="hidden">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">📋 Mes candidatures</h2><span class="muted" id="trackCount"></span></div>
+        <div id="trackEmpty" class="muted" style="padding:20px 0">Aucune candidature suivie. Enregistre une offre depuis Offres ou Lettre.</div>
+        <div style="overflow-x:auto"><table id="trackTable" class="hidden"><thead><tr><th>Poste</th><th>Entreprise</th><th>Ajouté</th><th>Statut</th><th>Lien</th><th></th></tr></thead><tbody id="trackBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="tab-profile" class="hidden">
+      <div class="grid g2">
+        <div class="panel">
+          <h2>⚙️ Profil de recherche</h2>
+          <label>Prénom / nom (signé sur les lettres)</label><input id="pName" placeholder="ex : Camille Dupont">
+          <label>Domaine / secteur</label><select id="pSector"></select>
+          <label>Mots-clés</label><input id="pKeywords" placeholder="ex : développeur python">
+          <label>Localisation (région, département ou ville)</label>
+          <input id="pLocation" list="regionList" placeholder="ex : Île-de-France, Hauts-de-Seine, 92, Lyon…">
+          <datalist id="regionList"></datalist>
+          <p class="muted" style="font-size:12px;margin-top:4px">Région, département (nom ou code ex : 92) ou ville. Vide = toute la France.</p>
+          <div class="grid g2">
+            <div><label>Contrat</label><select id="pContract"><option value="">Peu importe</option><option>CDI</option><option>CDD</option><option>Alternance</option><option>Stage</option><option>Freelance</option><option>Intérim</option></select></div>
+            <div><label>Télétravail</label><select id="pRemote"><option value="">Peu importe</option><option>Sur site</option><option>Hybride</option><option>Full remote</option></select></div>
+          </div>
+          <button class="btn" style="margin-top:16px" onclick="saveProfile()">💾 Enregistrer</button>
+        </div>
+        <div class="panel">
+          <h2>✍️ Modèle de lettre</h2>
+          <label>Ton parcours en une phrase</label><input id="pPitch" placeholder="ex : Développeur, 4 ans en fintech">
+          <label>Compétences clés (virgules)</label><input id="pSkills" placeholder="ex : Python, SQL, anglais">
+          <label>Ce qui te motive</label><textarea id="pMotivation" placeholder="ex : rejoindre une équipe à impact…"></textarea>
+          <label>Formule de politesse</label><input id="pClosing">
+          <div class="section-title"><h3>🔔 Alertes e-mail</h3><div class="line"></div></div>
+          <label class="switch"><input type="checkbox" id="aEnabled"> Recevoir un e-mail dès qu'une nouvelle offre correspond à mon profil</label>
+          <label>E-mail pour les alertes</label><input id="aEmail" type="email" placeholder="ton@email.fr">
+          <button class="btn" style="margin-top:14px" onclick="saveProfile()">💾 Enregistrer</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">JobRadar · version en ligne · France Travail + sources ouvertes · construit pour Fiona</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- API ---------- */
+const api = {
+  async req(m,u,b){
+    const r=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},credentials:'include',body:b?JSON.stringify(b):undefined});
+    let j=null; try{j=await r.json();}catch(e){}
+    if(!r.ok) throw Object.assign(new Error((j&&j.error)||('HTTP '+r.status)),{status:r.status});
+    return j;
+  },
+  get(u){return this.req('GET',u);}, post(u,b){return this.req('POST',u,b);},
+  put(u,b){return this.req('PUT',u,b);}, del(u){return this.req('DELETE',u);}
+};
+let USER=null, FT_OK=false, OFFERS=[];
+
+/* ---------- Données statiques (client) ---------- */
+const SECTORS={
+ "Tech / Informatique":[["Welcome to the Jungle","Startups & tech","https://www.welcometothejungle.com/fr/jobs?query={kw}&aroundQuery={loc}&sortBy=mostRecent"],["FreeWork","IT & freelance","https://www.free-work.com/fr/tech-it/jobs?query={kw}"],["LesJeudis","Emplois IT","https://www.lesjeudis.com/offres-emploi?q={kw}&l={loc}"],["WeLoveDevs","Développeurs","https://welovedevs.com/fr/jobs/?query={kw}"]],
+ "Santé / Médical":[["Staffsanté","Soignants","https://www.staffsante.fr/offres-emploi?q={kw}&l={loc}"],["Emploisoignant","Paramédical","https://www.emploisoignant.fr/recherche?q={kw}"],["FHF Emploi","Hôpital public","https://emploi.fhf.fr/offres/?q={kw}"]],
+ "Finance / Banque / Assurance":[["eFinancialCareers","Finance","https://www.efinancialcareers.fr/recherche-emploi?keywords={kw}&location={loc}"],["Michael Page","Cadres finance","https://www.michaelpage.fr/emploi/recherche?keywords={kw}"]],
+ "Juridique / Droit":[["Village de la Justice","Droit","https://www.village-justice.com/emploi-juriste/?q={kw}"],["Carrières Juridiques","Juristes","https://www.carrieres-juridiques.com/annonces-emploi-droit?keyword={kw}"]],
+ "Marketing / Communication":[["Welcome to the Jungle","Marketing & com","https://www.welcometothejungle.com/fr/jobs?query={kw}&aroundQuery={loc}&sortBy=mostRecent"],["Les Jeudis Marketing","Digital","https://www.lesjeudis.com/offres-emploi?q={kw}%20marketing&l={loc}"]],
+ "Ingénierie / Industrie":[["L'Usine Nouvelle Emploi","Industrie","https://emploi.usinenouvelle.com/recherche/?q={kw}&l={loc}"],["APEC Ingénieurs","Cadres techniques","https://www.apec.fr/candidat/recherche-emploi.html/emploi?motsCles={kw}&sortsType=DATE"]],
+ "Enseignement / Formation":[["Choisir le Service Public","Éducation","https://choisirleservicepublic.gouv.fr/nos-offres/filtre/mot-cles/{kw}/"]],
+ "Social / ESS / Associatif":[["Jobs that make sense","Emplois à impact","https://jobs.makesense.org/fr/jobs?query={kw}"],["Portail de l'ESS","Économie sociale","https://emplois.ess-france.org/?q={kw}"]],
+ "Hôtellerie / Restauration / Tourisme":[["L'Hôtellerie Restauration","CHR","https://www.lhotellerie-restauration.fr/emploi/recherche.htm?q={kw}&l={loc}"]],
+ "BTP / Construction":[["Batiactu Emploi","Bâtiment","https://emploi.batiactu.com/offres-emploi?q={kw}&l={loc}"],["Lemoniteur Emploi","BTP","https://emploi.lemoniteur.fr/recherche/?q={kw}"]],
+ "Commerce / Vente / Distribution":[["Distrijob","Distribution","https://www.distrijob.fr/offres-emploi.php?q={kw}"],["HelloWork Commerce","Vente","https://www.hellowork.com/fr-fr/emploi/recherche.html?k={kw}%20commercial&l={loc}"]],
+ "Fonction publique":[["Choisir le Service Public","Emploi public","https://choisirleservicepublic.gouv.fr/nos-offres/filtre/mot-cles/{kw}/"],["Place de l'emploi public","3 FP","https://www.place-emploi-public.gouv.fr/nos-offres/?keywords={kw}"]],
+ "Autre / Généraliste":[["HelloWork","Généraliste","https://www.hellowork.com/fr-fr/emploi/recherche.html?k={kw}&l={loc}"],["Meteojob","Multi-secteurs","https://www.meteojob.com/recherche/emplois?what={kw}&where={loc}"]]
+};
+const BIG_SITES=[
+ ["Indeed","Le plus gros agrégateur","https://fr.indeed.com/jobs?q={kw}&l={loc}&sort=date&fromage=3",true],
+ ["LinkedIn","Réseau pro","https://www.linkedin.com/jobs/search/?keywords={kw}&location={loc}&sortBy=DD&f_TPR=r86400",true],
+ ["Welcome to the Jungle","Startups","https://www.welcometothejungle.com/fr/jobs?query={kw}&aroundQuery={loc}&sortBy=mostRecent",true],
+ ["APEC","Cadres","https://www.apec.fr/candidat/recherche-emploi.html/emploi?motsCles={kw}&sortsType=DATE",true],
+ ["Glassdoor","Offres + avis","https://www.glassdoor.fr/Emploi/jobs.htm?sc.keyword={kw}&locKeyword={loc}",false],
+ ["Google for Jobs","Méta-recherche","https://www.google.com/search?q={kw}+emploi+{loc}&ibp=htl;jobs",false],
+ ["HelloWork","Généraliste FR","https://www.hellowork.com/fr-fr/emploi/recherche.html?k={kw}&l={loc}",false],
+ ["Monster","Généraliste","https://www.monster.fr/emploi/recherche/?q={kw}&where={loc}&tm=1",true]
+];
+const REGIONS={"Île-de-France":"11","Auvergne-Rhône-Alpes":"84","Bourgogne-Franche-Comté":"27","Bretagne":"53","Centre-Val de Loire":"24","Corse":"94","Grand Est":"44","Hauts-de-France":"32","Normandie":"28","Nouvelle-Aquitaine":"75","Occitanie":"76","Pays de la Loire":"52","Provence-Alpes-Côte d'Azur":"93"};
+const DEPARTMENTS={"01":"Ain","02":"Aisne","03":"Allier","04":"Alpes-de-Haute-Provence","05":"Hautes-Alpes","06":"Alpes-Maritimes","07":"Ardèche","08":"Ardennes","09":"Ariège","10":"Aube","11":"Aude","12":"Aveyron","13":"Bouches-du-Rhône","14":"Calvados","15":"Cantal","16":"Charente","17":"Charente-Maritime","18":"Cher","19":"Corrèze","2A":"Corse-du-Sud","2B":"Haute-Corse","21":"Côte-d'Or","22":"Côtes-d'Armor","23":"Creuse","24":"Dordogne","25":"Doubs","26":"Drôme","27":"Eure","28":"Eure-et-Loir","29":"Finistère","30":"Gard","31":"Haute-Garonne","32":"Gers","33":"Gironde","34":"Hérault","35":"Ille-et-Vilaine","36":"Indre","37":"Indre-et-Loire","38":"Isère","39":"Jura","40":"Landes","41":"Loir-et-Cher","42":"Loire","43":"Haute-Loire","44":"Loire-Atlantique","45":"Loiret","46":"Lot","47":"Lot-et-Garonne","48":"Lozère","49":"Maine-et-Loire","50":"Manche","51":"Marne","52":"Haute-Marne","53":"Mayenne","54":"Meurthe-et-Moselle","55":"Meuse","56":"Morbihan","57":"Moselle","58":"Nièvre","59":"Nord","60":"Oise","61":"Orne","62":"Pas-de-Calais","63":"Puy-de-Dôme","64":"Pyrénées-Atlantiques","65":"Hautes-Pyrénées","66":"Pyrénées-Orientales","67":"Bas-Rhin","68":"Haut-Rhin","69":"Rhône","70":"Haute-Saône","71":"Saône-et-Loire","72":"Sarthe","73":"Savoie","74":"Haute-Savoie","75":"Paris","76":"Seine-Maritime","77":"Seine-et-Marne","78":"Yvelines","79":"Deux-Sèvres","80":"Somme","81":"Tarn","82":"Tarn-et-Garonne","83":"Var","84":"Vaucluse","85":"Vendée","86":"Vienne","87":"Haute-Vienne","88":"Vosges","89":"Yonne","90":"Territoire de Belfort","91":"Essonne","92":"Hauts-de-Seine","93":"Seine-Saint-Denis","94":"Val-de-Marne","95":"Val-d'Oise"};
+const CAREERS={"decathlon":"https://joinus.decathlon.fr/fr/annonces"};
+const COMPANY_SUGGESTIONS=["Decathlon","Leroy Merlin","Carrefour","Auchan","SNCF","Orange","L'Oréal","Capgemini","Doctolib","EDF"];
+
+/* ---------- Auth ---------- */
+let AUTH_MODE='login';
+function authMode(m){ AUTH_MODE=m;
+  document.getElementById('tabLogin').className='btn sm'+(m==='login'?'':' sec');
+  document.getElementById('tabReg').className='btn sm'+(m==='register'?'':' sec');
+  document.getElementById('authSubmit').textContent=(m==='login'?'Se connecter':'Créer mon compte');
+  document.getElementById('authErr').textContent='';
+}
+async function submitAuth(){
+  const email=document.getElementById('authEmail').value.trim();
+  const password=document.getElementById('authPass').value;
+  const errEl=document.getElementById('authErr'); errEl.textContent='';
+  if(!email||!password){ errEl.textContent='E-mail et mot de passe requis.'; return; }
+  try{
+    const r=await api.post(AUTH_MODE==='login'?'/api/login':'/api/register',{email,password});
+    USER=r.user; await afterLogin();
+  }catch(e){ errEl.textContent=e.message||'Erreur'; }
+}
+async function afterLogin(){
+  try{ const me=await api.get('/api/me'); USER=me.user; FT_OK=me.ftConfigured; }catch(e){}
+  document.getElementById('authView').classList.add('hidden');
+  document.getElementById('appView').classList.remove('hidden');
+  buildLocationList(); loadProfileForm(); refreshHeader(); refreshSummary(); buildSites(); renderCompanies();
+  renderTracker(); tab('search'); fetchJobs();
+}
+async function doLogout(){ try{await api.post('/api/logout');}catch(e){} location.reload(); }
+
+/* ---------- En-tête / résumé ---------- */
+function initials(n){ return (n||'?').trim().split(/\s+/).map(s=>s[0]).slice(0,2).join('').toUpperCase()||'?'; }
+function refreshHeader(){ const n=USER.profile.name||USER.email; document.getElementById('badgeAv').textContent=initials(n); document.getElementById('badgeName').textContent=n; document.getElementById('helloName').textContent=(USER.profile.name||USER.email.split('@')[0])+' 👋'; }
+function refreshSummary(){ document.getElementById('sumDomain').textContent=USER.profile.sector||'—'; document.getElementById('sumKw').textContent=USER.profile.keywords||'—'; document.getElementById('sumLoc').textContent=USER.profile.location||'toute la France'; document.getElementById('sectorLabel').textContent=USER.profile.sector||'ton domaine'; }
+
+/* ---------- Tabs ---------- */
+function tab(name){ ['search','letter','tracker','profile'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name)); document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name)); if(name==='tracker')renderTracker(); }
+
+/* ---------- Profil ---------- */
+function loadProfileForm(){ const p=USER.profile; const sec=document.getElementById('pSector'); sec.innerHTML='';
+  Object.keys(SECTORS).forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(s===p.sector)o.selected=true;sec.appendChild(o);});
+  pName.value=p.name||'';pKeywords.value=p.keywords||'';pLocation.value=p.location||'';pContract.value=p.contract||'';pRemote.value=p.remote||'';
+  pPitch.value=p.pitch||'';pSkills.value=p.skills||'';pMotivation.value=p.motivation||'';pClosing.value=p.closing||'';
+  aEnabled.checked=!!(USER.alerts&&USER.alerts.enabled); aEmail.value=(USER.alerts&&USER.alerts.email)||USER.email;
+}
+async function saveProfile(){
+  const profile={name:pName.value.trim(),sector:pSector.value,keywords:pKeywords.value.trim(),location:pLocation.value.trim(),contract:pContract.value,remote:pRemote.value,pitch:pPitch.value.trim(),skills:pSkills.value.trim(),motivation:pMotivation.value.trim(),closing:pClosing.value.trim()};
+  try{
+    const r=await api.put('/api/profile',{profile,companies:USER.companies});
+    USER=r.user;
+    await api.put('/api/alerts',{enabled:aEnabled.checked,email:aEmail.value.trim()});
+    USER.alerts={enabled:aEnabled.checked,email:aEmail.value.trim()};
+    refreshHeader();refreshSummary();buildSites();renderCompanies();toast('Enregistré ✅');tab('search');fetchJobs();
+  }catch(e){ toast(e.message||'Erreur',true); }
+}
+
+/* ---------- Localisation & liens ---------- */
+function enc(s){return encodeURIComponent((s||'').trim());}
+function dash(s){return (s||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'emploi';}
+function normLoc(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function resolveLocCanon(){ const raw=(USER.profile.location||'').trim(); if(!raw)return raw;
+  const up=raw.toUpperCase(); if(DEPARTMENTS[up])return DEPARTMENTS[up];
+  const par=raw.match(/\(([0-9]{2,3}|2[AB])\)\s*$/i); if(par&&DEPARTMENTS[par[1].toUpperCase()])return DEPARTMENTS[par[1].toUpperCase()];
+  const n=normLoc(raw); if(n==='idf')return 'Île-de-France';
+  for(const name in REGIONS)if(normLoc(name)===n)return name;
+  for(const c in DEPARTMENTS)if(normLoc(DEPARTMENTS[c])===n)return DEPARTMENTS[c];
+  return raw;
+}
+function buildUrl(tpl){ const canon=resolveLocCanon(); return tpl.replace(/{kw}/g,enc(USER.profile.keywords)).replace(/{loc}/g,enc(canon)).replace(/{kwd}/g,dash(USER.profile.keywords)).replace(/{locd}/g,dash(canon)); }
+function buildSites(){
+  const grid=document.getElementById('siteGrid');grid.innerHTML='';
+  BIG_SITES.forEach(([n,d,tpl,ds])=>{const a=document.createElement('a');a.className='site';a.href=buildUrl(tpl);a.target='_blank';a.rel='noopener';a.innerHTML=`<span class="sn">${n}</span><span class="sd">${d}</span>${ds?'<span class="datesort">✓ trié par date</span>':'<span class="datesort" style="background:rgba(154,160,196,.12);color:var(--muted);border-color:var(--line)">recherche</span>'}`;grid.appendChild(a);});
+  const niche=document.getElementById('nicheGrid');niche.innerHTML='';
+  (SECTORS[USER.profile.sector]||SECTORS['Autre / Généraliste']).forEach(([n,d,tpl])=>{const a=document.createElement('a');a.className='site';a.href=buildUrl(tpl);a.target='_blank';a.rel='noopener';a.innerHTML=`<span class="sn">${n}</span><span class="sd">${d}</span><span class="datesort" style="background:rgba(108,140,255,.15);color:var(--accent);border-color:rgba(108,140,255,.3)">spécialisé</span>`;niche.appendChild(a);});
+}
+function buildLocationList(){ const dl=document.getElementById('regionList');dl.innerHTML='';const add=v=>{const o=document.createElement('option');o.value=v;dl.appendChild(o);};add('Toute la France');Object.keys(REGIONS).forEach(add);Object.keys(DEPARTMENTS).forEach(c=>add(DEPARTMENTS[c]+' ('+c+')')); }
+
+/* ---------- Entreprises ---------- */
+function careerLink(c){const k=normLoc(c).replace(/ /g,'');return CAREERS[k]||('https://www.google.com/search?q='+enc(c+' recrutement carrières offres emploi'));}
+function careerFiltered(c){return 'https://www.google.com/search?q='+enc(c+' '+(USER.profile.keywords||'')+' '+resolveLocCanon()+' offre emploi');}
+function renderCompanies(){ const grid=document.getElementById('companyGrid');grid.innerHTML='';
+  (USER.companies||[]).forEach((c,i)=>{const known=CAREERS[normLoc(c).replace(/ /g,'')];const card=document.createElement('div');card.className='site';card.style.gap='6px';
+    card.innerHTML=`<span class="sn">${esc(c)}</span><div class="row" style="gap:6px;margin-top:2px"><a class="btn sm" href="${careerLink(c)}" target="_blank" rel="noopener">Recrutement ↗</a><a class="btn sec sm" href="${careerFiltered(c)}" target="_blank" rel="noopener">Offres filtrées ↗</a><button class="btn ghost sm" onclick="delCompany(${i})">✕</button></div><span class="datesort" style="background:${known?'rgba(67,214,160,.15)':'rgba(154,160,196,.12)'};color:${known?'var(--accent2)':'var(--muted)'};border-color:var(--line)">${known?'✓ page officielle':'via Google'}</span>`;grid.appendChild(card);});
+  const sug=document.getElementById('companySuggest');sug.innerHTML='';
+  COMPANY_SUGGESTIONS.filter(s=>!(USER.companies||[]).map(x=>normLoc(x)).includes(normLoc(s))).forEach(s=>{const b=document.createElement('button');b.className='chip';b.style.cursor='pointer';b.textContent='+ '+s;b.onclick=()=>addCompanyName(s);sug.appendChild(b);});
+}
+async function persistCompanies(){ try{const r=await api.put('/api/profile',{profile:USER.profile,companies:USER.companies});USER=r.user;}catch(e){toast(e.message,true);} }
+function addCompanyName(name){name=(name||'').trim();if(!name)return;if(!USER.companies)USER.companies=[];if(USER.companies.map(x=>normLoc(x)).includes(normLoc(name))){toast('Déjà dans ta liste');return;}USER.companies.push(name);persistCompanies();renderCompanies();toast(name+' ajoutée 🏢');}
+function addCompany(){const i=document.getElementById('companyInput');addCompanyName(i.value);i.value='';}
+function delCompany(i){USER.companies.splice(i,1);persistCompanies();renderCompanies();}
+
+/* ---------- Offres ---------- */
+function timeAgo(ts){if(!ts)return'';const d=(Date.now()-ts)/1000;if(d<3600)return Math.max(1,Math.round(d/60))+' min';if(d<86400)return Math.round(d/3600)+' h';return Math.round(d/86400)+' j';}
+async function fetchJobs(){
+  const box=document.getElementById('liveJobs');box.innerHTML='<div class="muted" style="padding:14px">Recherche des offres les plus récentes…</div>';
+  const banner=document.getElementById('ftBanner');banner.classList.add('hidden');
+  try{
+    const data=await api.get('/api/jobs');OFFERS=data.offers||[];
+    document.getElementById('liveCount').textContent=OFFERS.length;
+    if(!data.ftConfigured){banner.classList.remove('hidden');banner.innerHTML="⚙️ <b>France Travail pas encore branché</b> : ajoute les clés à l'étape déploiement pour voir les offres françaises ici. En attendant, le lanceur multi-sites plus bas couvre tout.";}
+    box.innerHTML='';
+    if(OFFERS.length===0){ box.innerHTML=`<div class="notice">Aucune offre pour « ${esc(USER.profile.keywords||'ta recherche')} »${USER.profile.location?' en '+esc(USER.profile.location):''} dans les sources en direct pour le moment. 👉 Utilise le <b>lanceur multi-sites</b> juste en dessous (France Travail, Indeed… filtrés sur ta zone).</div>`; return; }
+    OFFERS.forEach((o,idx)=>{const recent=o.ts&&(Date.now()-o.ts)<3*86400*1000;const card=document.createElement('div');card.className='jobcard';
+      card.innerHTML=`<div class="row" style="justify-content:space-between"><div class="jt">${esc(o.title||'Poste')}</div><div>${o.source==='France Travail'?'<span class="badge-ft">France Travail</span> ':''}${recent?'<span class="badge-new">NOUVEAU</span>':''}</div></div>
+      <div class="jc">${esc(o.company||'')}</div>
+      <div class="jm">📍 ${esc(o.location||'—')} ${o.ts?'· 🕒 il y a '+timeAgo(o.ts):''} ${o.source!=='France Travail'?'· <span class="pill">'+esc(o.source)+'</span>':''}</div>
+      <div>${(o.tags||[]).slice(0,5).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>
+      <div class="actions"><a class="btn sm" href="${o.url}" target="_blank" rel="noopener">Postuler ↗</a><button class="btn sec sm" onclick="letterFromIdx(${idx})">✍️ Lettre</button><button class="btn ghost sm" onclick="saveIdx(${idx})">💾 Suivre</button></div>`;
+      box.appendChild(card);});
+  }catch(e){ box.innerHTML='<div class="warnbox">Impossible de charger les offres ('+esc(e.message||'')+').</div>'; }
+}
+function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ---------- Lettre ---------- */
+function fillDemoOffer(){lPoste.value='Chargé(e) de communication';lEntreprise.value='Nova Studio';lLieu.value='Nantes';lSource.value='France Travail';lCriteres.value='community management, rédaction web, Canva, 2 ans d\'expérience';toast('Exemple rempli');}
+function letterFromIdx(i){const o=OFFERS[i];lPoste.value=o.title||'';lEntreprise.value=o.company||'';lLieu.value=o.location||'';lSource.value=o.source||'';lCriteres.value=(o.tags||[]).join(', ');tab('letter');genLetter();}
+function splitCriteria(t){return (t||'').split(/[\n,;•·]/).map(s=>s.trim()).filter(s=>s.length>1);}
+function humanList(a){a=a.filter(Boolean);if(a.length<=1)return a[0]||'';return a.slice(0,-1).join(', ')+' et '+a[a.length-1];}
+function matchedSkills(cr,sk){const l=sk.map(s=>s.toLowerCase());return cr.filter(c=>l.some(s=>c.toLowerCase().includes(s)||s.includes(c.toLowerCase())));}
+function genLetter(){
+  const p=USER.profile;const poste=lPoste.value.trim(),ent=lEntreprise.value.trim();
+  if(!poste||!ent){toast('Renseigne le poste et l\'entreprise');return;}
+  const lieu=lLieu.value.trim(),source=lSource.value.trim();const criteria=splitCriteria(lCriteres.value);
+  const skills=(p.skills||'').split(',').map(s=>s.trim()).filter(Boolean);
+  document.getElementById('aiState').textContent='Modèle intelligent (gratuit).';
+  const matched=matchedSkills(criteria,skills);const ml=matched.map(s=>s.toLowerCase());
+  const other=criteria.filter(c=>!ml.includes(c.toLowerCase())).slice(0,4);
+  const skillPhrase=matched.length?('Les compétences que vous recherchez — '+humanList(matched)+' — correspondent précisément à mon profil'):(skills.length?('Mon profil s\'appuie sur '+humanList(skills.slice(0,5))):'Mon parcours correspond aux attentes du poste');
+  const critPhrase=other.length?('J\'ai par ailleurs relevé que le poste demande '+humanList(other)+', autant d\'aspects sur lesquels je peux m\'investir dès mon arrivée.'):(matched.length?'Je pourrai les mettre au service de vos projets dès mon arrivée.':'');
+  const pitch=p.pitch||'professionnel(le) motivé(e) par ce type de mission';
+  const motiv=p.motivation||'contribuer à vos projets et évoluer au sein de votre équipe';
+  const via=source?('découverte sur '+source):'que vous proposez';
+  const closing=p.closing||'Je vous prie d\'agréer, Madame, Monsieur, l\'expression de mes salutations distinguées.';
+  const date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('letterOut').textContent=
+`Objet : Candidature au poste de ${poste}${lieu?' — '+lieu:''}
+
+Le ${date}
+
+Madame, Monsieur,
+
+Actuellement ${pitch}, je vous adresse ma candidature pour le poste de ${poste} au sein de ${ent}, offre ${via}.
+
+${skillPhrase}. ${critPhrase}
+
+Ce qui m'attire particulièrement chez ${ent}, c'est la possibilité de ${motiv}. Rigoureux(se) et impliqué(e), je saurai m'intégrer rapidement et apporter une réelle valeur ajoutée à votre équipe${lieu?' à '+lieu.replace(/\s*\(.*\)/,''):''}.
+
+Je serais ravi(e) de vous exposer ma motivation lors d'un entretien, à votre convenance.
+
+${closing}
+
+${p.name||USER.email}`;
+}
+function copyLetter(){navigator.clipboard.writeText(document.getElementById('letterOut').innerText).then(()=>toast('Copié 📋')).catch(()=>toast('Ctrl+C pour copier'));}
+function downloadLetter(){const t=document.getElementById('letterOut').innerText;const b=new Blob([t],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='lettre.txt';a.click();toast('Téléchargé ⬇️');}
+
+/* ---------- Suivi ---------- */
+async function saveIdx(i){const o=OFFERS[i];try{const r=await api.post('/api/saved',{item:{poste:o.title,entreprise:o.company,url:o.url}});USER.saved=r.saved;toast('Ajouté au suivi 💾');}catch(e){toast(e.message,true);}}
+async function saveFromLetter(){const poste=lPoste.value.trim(),ent=lEntreprise.value.trim();if(!poste||!ent){toast('Renseigne le poste et l\'entreprise');return;}try{const r=await api.post('/api/saved',{item:{poste,entreprise:ent,url:'',letter:document.getElementById('letterOut').innerText}});USER.saved=r.saved;toast('Candidature suivie 💾');}catch(e){toast(e.message,true);}}
+function renderTracker(){const body=document.getElementById('trackBody');const empty=document.getElementById('trackEmpty');const table=document.getElementById('trackTable');const saved=USER.saved||[];document.getElementById('trackCount').textContent=saved.length+' candidature(s)';
+  if(saved.length===0){empty.classList.remove('hidden');table.classList.add('hidden');return;}empty.classList.add('hidden');table.classList.remove('hidden');body.innerHTML='';
+  const ST=['À postuler','Postulé','Relancé','Entretien','Refusé','Accepté'];
+  saved.forEach(s=>{const tr=document.createElement('tr');const sel=ST.map(x=>`<option ${x===s.status?'selected':''}>${x}</option>`).join('');
+    tr.innerHTML=`<td><b>${esc(s.poste||'')}</b>${s.letter?' <span class="pill">lettre ✓</span>':''}</td><td>${esc(s.entreprise||'')}</td><td class="muted">${new Date(s.added).toLocaleDateString('fr-FR')}</td><td><select class="status-sel" onchange="setStatus('${s.id}',this.value)">${sel}</select></td><td>${s.url?`<a href="${s.url}" target="_blank" rel="noopener">ouvrir ↗</a>`:'—'}</td><td><button class="btn ghost sm" onclick="delSaved('${s.id}')">✕</button></td>`;body.appendChild(tr);});
+}
+async function setStatus(id,v){try{const r=await api.put('/api/saved/'+id,{item:{status:v}});USER.saved=r.saved;}catch(e){toast(e.message,true);}}
+async function delSaved(id){try{const r=await api.del('/api/saved/'+id);USER.saved=r.saved;renderTracker();}catch(e){toast(e.message,true);}}
+
+/* ---------- Toast + init ---------- */
+let toastT;function toast(m,err){const t=document.getElementById('toast');t.textContent=m;t.className='toast show'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='toast',2600);}
+authMode('login');
+(async()=>{ try{ const me=await api.get('/api/me'); USER=me.user;FT_OK=me.ftConfigured; await afterLogin(); }catch(e){ /* pas connecté */ } })();
+</script>
+</body>
+</html>

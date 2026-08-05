@@ -1,0 +1,25 @@
+name: JobRadar - scan des offres et alertes
+# Planificateur GRATUIT : lance le scan régulièrement, même appli fermée.
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # toutes les ~15 min (GitHub peut espacer un peu)
+  workflow_dispatch: {}       # bouton "lancer maintenant"
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --omit=dev || npm install --omit=dev
+      - name: Scan + alertes
+        env:
+          FT_CLIENT_ID: ${{ secrets.FT_CLIENT_ID }}
+          FT_CLIENT_SECRET: ${{ secrets.FT_CLIENT_SECRET }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          # IMPORTANT : en production, le scan et le site doivent partager le MÊME stockage
+          # (voir README, étape déploiement). STORE_URL sera configuré à ce moment-là.
+          STORE_URL: ${{ secrets.STORE_URL }}
+        run: node lib/scan.js
